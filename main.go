@@ -28,9 +28,9 @@
 //
 //	git diff rev1 rev2 | grepdiff foo
 //
-// If you are feeling particularly adventurous, to stage those hunks:
+// If you are feeling particularly adventurous, to apply those changes:
 //
-//	git diff rev1 rev2 | grepdiff foo | EDITOR='bash -c "cat >$1"' git add -e
+//	git diff rev1 rev2 | grepdiff foo | git apply
 //
 package main
 
