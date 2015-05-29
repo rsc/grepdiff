@@ -23,10 +23,10 @@
 // Unlike grep, the regexp search considers the entire hunk
 // starting with the @@ line, not individual lines.
 // It is therefore possible to search for multiline matches.
-// As a nod to grep, however, the regexp search enables the (?m) flag
-// by default, so that ^ and $ match the start and end of each line,
-// not just the start and end of the hunk.
-// (To disable this, start the regexp passed to grepdiff with (?-m).)
+// As a nod to grep, however, by default the regexp search allows ^ and $ to
+// match the start and end of each line, not just the start and end of the hunk.
+// (To restrict ^ and $ to the start and end of the entire hunk,
+// begin prefix the regexp passed to grepdiff with ``(?-m)''.)
 //
 // Grepdiff exits with status 0 if it found any matches, 1 if it found no matches, and 2 if an error occurred.
 //
