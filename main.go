@@ -12,25 +12,37 @@
 // and prints a reduced diff containing only the hunks matching
 // the regular expression.
 //
+// The diffs are expected to be in unified diff format,
+// as produced by commands like ``git diff'' or ``hg diff''.
+//
 // The regular expression syntax is that of the Go regexp package,
 // which matches RE2 and roughly matches PCRE, Perl, and most
 // other languages.
 // For details, see ``go doc regexp/syntax'' or https://godoc.org/regexp/syntax.
 //
-// The diffs are expected to be in roughly unified diff format,
-// as produced by commands like ``git diff'' or ``hg diff''.
+// Unlike grep, the regexp search considers the entire hunk
+// starting with the @@ line, not individual lines.
+// It is therefore possible to search for multiline matches.
+// As a nod to grep, however, the regexp search enables the (?m) flag
+// by default, so that ^ and $ match the start and end of each line,
+// not just the start and end of the hunk.
+// (To disable this, start the regexp passed to grepdiff with (?-m).)
 //
 // Grepdiff exits with status 0 if it found any matches, 1 if it found no matches, and 2 if an error occurred.
 //
-// Example
+// Examples
 //
-// To diff two Git revisions and extract just the hunks mentioning foo:
+// Diff two Git revisions and extract just the hunks mentioning foo:
 //
 //	git diff rev1 rev2 | grepdiff foo
 //
-// If you are feeling particularly adventurous, to apply those changes:
+// For the adventurous, apply those changes:
 //
 //	git diff rev1 rev2 | grepdiff foo | git apply
+//
+// Extract changes in func New:
+//
+//	git diff rev1 HEAD | grepdiff ' @@ func New\('
 //
 package main
 
@@ -62,12 +74,21 @@ func main() {
 		usage()
 	}
 
-	re, err := regexp.Compile(flag.Arg(0))
+	reStr := flag.Arg(0)
+	files := flag.Args()[1:]
+
+	// Compile regexp twice: once unmodified for reporting errors,
+	// and again with (?m) for real use. If somehow the (?m) does cause
+	// a problem, handle it gracefully.
+	re, err := regexp.Compile(reStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	re, err = regexp.Compile("(?m)" + reStr)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	files := flag.Args()[1:]
 	if len(files) == 0 {
 		grepDiff(re, os.Stdin)
 	} else {
