@@ -44,6 +44,10 @@
 //
 //	git diff rev1 HEAD | grepdiff ' @@ func New\('
 //
+// Search for new TODOs before sending out for review:
+//
+//	git diff origin...HEAD | grepdiff '^\+.*TODO'
+//
 package main
 
 import (
